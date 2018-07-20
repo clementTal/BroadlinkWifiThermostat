@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: BroadlinkWifiThermostat
+Version: 1.0.1
+Summary: Python mmodule to controle broadlink wifi thermostat
+Home-page: https://github.com/clementTal/BroadlinkWifiThermostat
+Author: Clément talvard
+Author-email: c.talvard@gmail.com
+License: UNKNOWN
+Description: Python mmodule to controle broadlink wifi thermostat
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
