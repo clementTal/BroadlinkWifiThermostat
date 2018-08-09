@@ -4,7 +4,7 @@ cache: pip
 install:
   - pip install -U broadlink
 script:
-
+  - echo "todo"
 deploy:
   provider: pypi
   user: c.talvard
