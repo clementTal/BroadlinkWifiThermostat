@@ -6,10 +6,11 @@ language: python
 python: "3.5.3"
 cache: pip
 install:
-  - pip install -U broadlink
+  - pip install -U broadlink setuptools wheel
 script:
-  - echo "todo"
+  - echo "toto"
 deploy:
+  distributions: sdist bdist_wheel
   provider: pypi
   user: c.talvard
   password: 
