@@ -1,0 +1,11 @@
+language: python
+
+deploy:
+  provider: pypi
+  user: c.talvard
+  password: 
+    secure: 78T/orBTUDlD0dev9wsdB7NpFZp0YXKOqfbiT9rnPGEFpo5lq6SWY56DtggUgVC834+W15v1gv0tg5OLLZRv/f5iJ/0EKZNp5sDJYsxkLbryJowFCynkpObH73ZK5kE+xZPgMEzgj8CN8eyz6aAJLQRWc4+ZqK+0kxt07qQrT7QrexgoeJxQQY6S31Ufm4lEXwV5H/gmajwVC/BIzCy+kKfliqecDFkeqDXZlTW/draNbr1RL4itA4yGvPYcUkDJuu91f/lzoKDxpC2YS9Pwipjjh/GP+mPcDav+LKxCM/S7xC6mDIHKaU7lKl36r4U72ZRbse+hFWe4tTN0WThrhUEZCugZBAXLxeJU5PKYqRPZNHta/tY82CrvgcF11s5fkSw6Ptl8JIYeFFVcmkg4ZAPK6W0qMx+RGM06V+rcVko82pOYXI4rPfx9Jq+06vCLFuClCGEzg1FDSng7Flbn3gKRVL/Fuk6ylwxKSbGuHA5BiRKPHYHKo9ZQ4nyQLBVURVkdKaxOD+WH5Me5f4a0aTvMdROhCATewW5HvKnz1xj+vOTZoLomIialIyj0UqFK91ttSmT6Tj+O4zn/7HxbXULTSBdqw7oD9V79fr/PiMGvm+KTTSlE19VemC/lXM+ts0mHhNV9O6trkM4qFSgbM4SG1V7AT6SQWLT7cDxzkE=
+  on:
+    tags: true
+  on:
+    branch: master
