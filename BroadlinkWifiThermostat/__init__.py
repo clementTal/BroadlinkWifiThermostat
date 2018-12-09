@@ -1,6 +1,7 @@
 import broadlink
 import json
 import logging
+from datetime import datetime
 from socket import timeout
 
 POWER_ON = 1
@@ -10,57 +11,107 @@ MANUAL = 0
 CONF_WEEKDAY = "weekday"
 CONF_WEEKEND = "weekend"
 
+STATE_HEAT = 'heat'
+STATE_IDLE = 'idle'
+STATE_OFF = 'off'
+STATE_AUTO = 'auto'
+STATE_MANUAL = 'manual'
+STATE_ON = "on"
+
+DEFAULT_LOOP_MODE = 0
+
 _LOGGER = logging.getLogger(__name__)
 
 class Thermostat:
-    def __init__(self, mac, ip, name, advanced_config,
-                 schedule_wd, schedule_we, min_temp, max_temp, state_idle, state_manual, state_auto):
+    def __init__(self, mac, ip, name, use_external_temp=False):
         self.host = ip
         self.port = 80
         self.mac = bytes.fromhex(''.join(reversed(mac.split(':'))))
         self.current_temp = None
+        self.external_temp = None
         self.current_operation = None
         self.power = None
         self.target_temperature = None
         self.name = name
-        self.loop_mode = json.loads(advanced_config)["loop_mode"]
-        self.min_temp = min_temp
-        self.max_temp = max_temp
         self.state = 0
-        self.freeze = 0
-        self.advanced_config = json.loads(advanced_config)
-        self.schedule = {CONF_WEEKDAY: json.loads(schedule_wd),
-                         CONF_WEEKEND: json.loads(schedule_we)}
-        self.set_advanced_config(self.advanced_config)
-        self.set_schedule(self.schedule)
-        self.state_idle = state_idle
-        self.state_manual = state_manual
-        self.state_auto = state_auto
+        self.use_external_temp = use_external_temp
+        self.active = None
 
-    def set_advanced_config(self, advanced_config):
+    def set_time(self):
+        try:
+            device = self.connect()
+            if device.auth():
+                now = datetime.now()
+                device.set_time(now.hour, now.minute, now.second, now.weekday())
+        except timeout:
+            _LOGGER.error("set_schedule timeout")
+
+    def set_advanced_config(self, loop_mode, sen, osv, dif, svh, svl, adj, fre, pon):
         """Set the thermostat advanced config"""
         try:
             device = self.connect()
             if device.auth():
-                device.set_advanced(advanced_config["loop_mode"],
-                                    advanced_config["sen"],
-                                    advanced_config["osv"],
-                                    advanced_config["dif"],
-                                    advanced_config["svh"],
-                                    advanced_config["svl"],
-                                    advanced_config["adj"],
-                                    advanced_config["fre"],
-                                    advanced_config["pon"])
+                device.set_advanced(loop_mode, sen, osv, dif, svh,
+                                    svl, adj, fre, pon)
         except timeout:
             _LOGGER.error("set_advanced_config timeout")
 
-    def set_schedule(self, schedule):
+    def set_schedule(self, week_start_1, week_stop_1,
+                     week_start_2, week_stop_2,
+                     week_start_3, week_stop_3,
+                     weekend_start, weekend_stop,
+                     away_temp, home_temp):
         """Set the thermostat schedule"""
         try:
             device = self.connect()
             if device.auth():
-                device.set_schedule(schedule[CONF_WEEKDAY],
-                                    schedule[CONF_WEEKEND])
+                weekday_conf_1_in = {}
+                weekday_conf_2_in = {}
+                weekday_conf_3_in = {}
+                weekday_conf_1_out = {}
+                weekday_conf_2_out = {}
+                weekday_conf_3_out = {}
+                weekend_conf_in = {}
+                weekend_conf_out = {}
+
+                weekday_conf_1_in["start_hour"] = int(week_start_1.strftime('%H'))
+                weekday_conf_1_in["start_minute"] = int(week_start_1.strftime('%M'))
+                weekday_conf_1_in["temp"] = float(home_temp)
+
+                weekday_conf_1_out["start_hour"] = int(week_stop_1.strftime('%H'))
+                weekday_conf_1_out["start_minute"] = int(week_stop_1.strftime('%M'))
+                weekday_conf_1_out["temp"] = float(away_temp)
+
+                weekday_conf_2_in["start_hour"] = int(week_start_2.strftime('%H'))
+                weekday_conf_2_in["start_minute"] = int(week_start_2.strftime('%M'))
+                weekday_conf_2_in["temp"] = float(home_temp)
+
+                weekday_conf_2_out["start_hour"] = int(week_stop_2.strftime('%H'))
+                weekday_conf_2_out["start_minute"] = int(week_stop_2.strftime('%M'))
+                weekday_conf_2_out["temp"] = float(away_temp)
+
+                weekday_conf_3_in["start_hour"] = int(week_start_3.strftime('%H'))
+                weekday_conf_3_in["start_minute"] = int(week_start_3.strftime('%M'))
+                weekday_conf_3_in["temp"] = float(home_temp)
+
+                weekday_conf_3_out["start_hour"] = int(week_stop_3.strftime('%H'))
+                weekday_conf_3_out["start_minute"] = int(week_stop_3.strftime('%M'))
+                weekday_conf_3_out["temp"] = float(away_temp)
+
+                weekend_conf_in["start_hour"] = int(weekend_start.strftime('%H'))
+                weekend_conf_in["start_minute"] = int(weekend_start.strftime('%M'))
+                weekend_conf_in["temp"] = float(home_temp)
+
+                weekend_conf_out["start_hour"] = int(weekend_stop.strftime('%H'))
+                weekend_conf_out["start_minute"] = int(weekend_stop.strftime('%M'))
+                weekend_conf_out["temp"] = float(away_temp)
+
+                weekday_conf = [weekday_conf_1_in, weekday_conf_1_out,
+                                weekday_conf_2_in, weekday_conf_2_out,
+                                weekday_conf_3_in, weekday_conf_3_out]
+                weekend_conf = [weekend_conf_in, weekend_conf_out]
+
+                device.set_schedule(weekday_conf,weekend_conf)
         except timeout:
             _LOGGER.error("set_schedule timeout")
 
@@ -69,7 +120,7 @@ class Thermostat:
         try:
             device = self.connect()
             if device.auth():
-                if str(power) == self.state_idle:
+                if str(power) == STATE_OFF:
                     device.set_power(POWER_OFF)
                 else:
                     device.set_power(POWER_ON)
@@ -90,18 +141,13 @@ class Thermostat:
         try:
             device = self.connect()
             if device.auth():
-                if mode == self.state_auto:
+                if mode == STATE_AUTO:
                     device.set_power(POWER_ON)
-                    device.set_mode(AUTO, self.loop_mode)
-                elif mode == self.state_manual:
+                    device.set_mode(AUTO, DEFAULT_LOOP_MODE)
+                elif mode == STATE_MANUAL:
                     device.set_power(POWER_ON)
-                    device.set_mode(MANUAL, self.loop_mode)
-                elif mode == self.state_idle:
-                    device.set_mode(MANUAL, self.loop_mode)
-                    if self.freeze == 1:
-                        device.set_temp(float(12))
-                    else :
-                        device.set_temp(float(0))
+                    device.set_mode(MANUAL, DEFAULT_LOOP_MODE)
+                elif mode == STATE_OFF:
                     device.set_power(POWER_OFF)
         except timeout:
             _LOGGER.error("set_operation_mode timeout")
@@ -113,20 +159,25 @@ class Thermostat:
             device = self.connect()
             if device.auth():
                 data = device.get_full_status()
-                self.current_temp = data['room_temp']
+                if self.use_external_temp:
+                    self.current_temp = data['external_temp']
+                else:
+                    self.current_temp = data['room_temp']
                 self.target_temperature = data['thermostat_temp']
-                self.current_operation = self.state_idle \
+                self.external_temp = data['external_temp']
+                self.active = data['active']
+                self.current_operation = STATE_OFF \
                     if \
                     data["power"] == 0 \
                     else \
-                    (self.state_auto
+                    (STATE_AUTO
                      if
                      data["auto_mode"] == 1
                      else
-                     self.state_manual)
-                self.state = self.state_manual if data["active"] == 0 \
-                    else self.state_idle
-                self.freeze = data['fre']
+                     STATE_MANUAL)
+                self.state = STATE_HEAT if data["active"] == 1 \
+                    else STATE_IDLE
+
         except timeout:
             _LOGGER.error("read_status timeout")
 
