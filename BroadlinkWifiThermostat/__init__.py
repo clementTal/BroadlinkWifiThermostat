@@ -15,7 +15,6 @@ STATE_HEAT = 'heat'
 STATE_IDLE = 'idle'
 STATE_OFF = 'off'
 STATE_AUTO = 'auto'
-STATE_ON = "on"
 
 DEFAULT_LOOP_MODE = 0
 
@@ -143,7 +142,7 @@ class Thermostat:
                 if mode == STATE_AUTO:
                     device.set_power(POWER_ON)
                     device.set_mode(AUTO, DEFAULT_LOOP_MODE)
-                elif mode == STATE_ON:
+                elif mode == STATE_HEAT:
                     device.set_power(POWER_ON)
                     device.set_mode(MANUAL, DEFAULT_LOOP_MODE)
                 elif mode == STATE_OFF:
@@ -173,7 +172,7 @@ class Thermostat:
                      if
                      data["auto_mode"] == 1
                      else
-                     STATE_ON)
+                     STATE_HEAT)
                 self.state = STATE_HEAT if data["active"] == 1 \
                     else STATE_IDLE
 
