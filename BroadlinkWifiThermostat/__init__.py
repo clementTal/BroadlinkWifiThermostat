@@ -15,7 +15,6 @@ STATE_HEAT = 'heat'
 STATE_IDLE = 'idle'
 STATE_OFF = 'off'
 STATE_AUTO = 'auto'
-STATE_MANUAL = 'manual'
 STATE_ON = "on"
 
 DEFAULT_LOOP_MODE = 0
@@ -144,7 +143,7 @@ class Thermostat:
                 if mode == STATE_AUTO:
                     device.set_power(POWER_ON)
                     device.set_mode(AUTO, DEFAULT_LOOP_MODE)
-                elif mode == STATE_MANUAL:
+                elif mode == STATE_ON:
                     device.set_power(POWER_ON)
                     device.set_mode(MANUAL, DEFAULT_LOOP_MODE)
                 elif mode == STATE_OFF:
@@ -174,12 +173,12 @@ class Thermostat:
                      if
                      data["auto_mode"] == 1
                      else
-                     STATE_MANUAL)
+                     STATE_ON)
                 self.state = STATE_HEAT if data["active"] == 1 \
                     else STATE_IDLE
 
         except timeout:
-            _LOGGER.error("read_status timeout")
+            _LOGGER.warning("read_status timeout")
 
     def connect(self):
         """Open a connexion"""
