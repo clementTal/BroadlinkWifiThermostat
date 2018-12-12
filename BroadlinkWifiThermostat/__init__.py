@@ -46,66 +46,69 @@ class Thermostat:
         except timeout:
             _LOGGER.error("set_schedule timeout")
 
-    def set_advanced_config(self, loop_mode, sen, osv, dif, svh, svl, adj, fre, pon):
+    def set_advanced_config(self, advanced_conf):
         """Set the thermostat advanced config"""
         try:
             device = self.connect()
             if device.auth():
-                device.set_advanced(loop_mode, sen, osv, dif, svh,
-                                    svl, adj, fre, pon)
-                self.loop_mode = loop_mode
+                device.set_advanced(advanced_conf['loop_mode'],
+                                    advanced_conf['sen'],
+                                    advanced_conf['osv'],
+                                    advanced_conf['dif'],
+                                    advanced_conf['svh'],
+                                    advanced_conf['svl'],
+                                    advanced_conf['adj'],
+                                    advanced_conf['fre'],
+                                    advanced_conf['pon'])
+                self.loop_mode = advanced_conf['loop_mode']
         except timeout:
             _LOGGER.error("set_advanced_config timeout")
 
-    def set_schedule(self, week_start_1, week_stop_1,
-                     week_start_2, week_stop_2,
-                     week_start_3, week_stop_3,
-                     weekend_start, weekend_stop,
-                     away_temp, home_temp):
+    def set_schedule(self, schedules):
         """Set the thermostat schedule"""
         try:
             device = self.connect()
             if device.auth():
-                weekday_conf_1_in = {}
-                weekday_conf_2_in = {}
-                weekday_conf_3_in = {}
-                weekday_conf_1_out = {}
-                weekday_conf_2_out = {}
-                weekday_conf_3_out = {}
-                weekend_conf_in = {}
-                weekend_conf_out = {}
+                weekday_conf_1_in = dict()
+                weekday_conf_2_in = dict()
+                weekday_conf_3_in = dict()
+                weekday_conf_1_out = dict()
+                weekday_conf_2_out = dict()
+                weekday_conf_3_out = dict()
+                weekend_conf_in = dict()
+                weekend_conf_out = dict()
 
-                weekday_conf_1_in["start_hour"] = int(week_start_1.strftime('%H'))
-                weekday_conf_1_in["start_minute"] = int(week_start_1.strftime('%M'))
-                weekday_conf_1_in["temp"] = float(home_temp)
+                weekday_conf_1_in["start_hour"] = schedules['week_start_1'].strftime('%H')
+                weekday_conf_1_in["start_minute"] = int(schedules['week_start_1'].strftime('%M'))
+                weekday_conf_1_in["temp"] = float(schedules['home_temp'])
 
-                weekday_conf_1_out["start_hour"] = int(week_stop_1.strftime('%H'))
-                weekday_conf_1_out["start_minute"] = int(week_stop_1.strftime('%M'))
-                weekday_conf_1_out["temp"] = float(away_temp)
+                weekday_conf_1_out["start_hour"] = int(schedules['week_stop_1'].strftime('%H'))
+                weekday_conf_1_out["start_minute"] = int(schedules['week_stop_1'].strftime('%M'))
+                weekday_conf_1_out["temp"] = float(schedules['away_temp'])
 
-                weekday_conf_2_in["start_hour"] = int(week_start_2.strftime('%H'))
-                weekday_conf_2_in["start_minute"] = int(week_start_2.strftime('%M'))
-                weekday_conf_2_in["temp"] = float(home_temp)
+                weekday_conf_2_in["start_hour"] = int(schedules['week_start_2'].strftime('%H'))
+                weekday_conf_2_in["start_minute"] = int(schedules['week_start_2'].strftime('%M'))
+                weekday_conf_2_in["temp"] = float(schedules['home_temp'])
 
-                weekday_conf_2_out["start_hour"] = int(week_stop_2.strftime('%H'))
-                weekday_conf_2_out["start_minute"] = int(week_stop_2.strftime('%M'))
-                weekday_conf_2_out["temp"] = float(away_temp)
+                weekday_conf_2_out["start_hour"] = int(schedules['week_stop_2'].strftime('%H'))
+                weekday_conf_2_out["start_minute"] = int(schedules['week_stop_2'].strftime('%M'))
+                weekday_conf_2_out["temp"] = float(schedules['away_temp'])
 
-                weekday_conf_3_in["start_hour"] = int(week_start_3.strftime('%H'))
-                weekday_conf_3_in["start_minute"] = int(week_start_3.strftime('%M'))
-                weekday_conf_3_in["temp"] = float(home_temp)
+                weekday_conf_3_in["start_hour"] = int(schedules['week_start_3'].strftime('%H'))
+                weekday_conf_3_in["start_minute"] = int(schedules['week_start_3'].strftime('%M'))
+                weekday_conf_3_in["temp"] = float(schedules['home_temp'])
 
-                weekday_conf_3_out["start_hour"] = int(week_stop_3.strftime('%H'))
-                weekday_conf_3_out["start_minute"] = int(week_stop_3.strftime('%M'))
-                weekday_conf_3_out["temp"] = float(away_temp)
+                weekday_conf_3_out["start_hour"] = int(schedules['week_stop_3'].strftime('%H'))
+                weekday_conf_3_out["start_minute"] = int(schedules['week_stop_3'].strftime('%M'))
+                weekday_conf_3_out["temp"] = float(schedules['away_temp'])
 
-                weekend_conf_in["start_hour"] = int(weekend_start.strftime('%H'))
-                weekend_conf_in["start_minute"] = int(weekend_start.strftime('%M'))
-                weekend_conf_in["temp"] = float(home_temp)
+                weekend_conf_in["start_hour"] = int(schedules['weekend_start'].strftime('%H'))
+                weekend_conf_in["start_minute"] = int(schedules['weekend_start'].strftime('%M'))
+                weekend_conf_in["temp"] = float(schedules['home_temp'])
 
-                weekend_conf_out["start_hour"] = int(weekend_stop.strftime('%H'))
-                weekend_conf_out["start_minute"] = int(weekend_stop.strftime('%M'))
-                weekend_conf_out["temp"] = float(away_temp)
+                weekend_conf_out["start_hour"] = int(schedules['weekend_stop'].strftime('%H'))
+                weekend_conf_out["start_minute"] = int(schedules['weekend_stop'].strftime('%M'))
+                weekend_conf_out["temp"] = float(schedules['away_temp'])
 
                 weekday_conf = [weekday_conf_1_in, weekday_conf_1_out,
                                 weekday_conf_2_in, weekday_conf_2_out,
