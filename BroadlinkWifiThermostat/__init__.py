@@ -1,5 +1,4 @@
 import broadlink
-import json
 import logging
 from datetime import datetime
 from socket import timeout
@@ -16,12 +15,11 @@ STATE_IDLE = 'idle'
 STATE_OFF = 'off'
 STATE_AUTO = 'auto'
 
-DEFAULT_LOOP_MODE = 0
-
 _LOGGER = logging.getLogger(__name__)
 
+
 class Thermostat:
-    def __init__(self, mac, ip, name, use_external_temp=False):
+    def __init__(self, mac, ip, name, use_external_temp=False, awayTemp=12):
         self.host = ip
         self.port = 80
         self.mac = bytes.fromhex(''.join(reversed(mac.split(':'))))
@@ -31,9 +29,13 @@ class Thermostat:
         self.power = None
         self.target_temperature = None
         self.name = name
+        self.entity_id = "climate." + name
         self.state = 0
         self.use_external_temp = use_external_temp
         self.active = None
+        self.away = False
+        self.awayTemp = awayTemp
+        self.loop_mode = 0
 
     def set_time(self):
         try:
@@ -51,6 +53,7 @@ class Thermostat:
             if device.auth():
                 device.set_advanced(loop_mode, sen, osv, dif, svh,
                                     svl, adj, fre, pon)
+                self.loop_mode = loop_mode
         except timeout:
             _LOGGER.error("set_advanced_config timeout")
 
@@ -141,10 +144,10 @@ class Thermostat:
             if device.auth():
                 if mode == STATE_AUTO:
                     device.set_power(POWER_ON)
-                    device.set_mode(AUTO, DEFAULT_LOOP_MODE)
+                    device.set_mode(AUTO, self.loop_mode)
                 elif mode == STATE_HEAT:
                     device.set_power(POWER_ON)
-                    device.set_mode(MANUAL, DEFAULT_LOOP_MODE)
+                    device.set_mode(MANUAL, self.loop_mode)
                 elif mode == STATE_OFF:
                     device.set_power(POWER_OFF)
         except timeout:
@@ -178,6 +181,20 @@ class Thermostat:
 
         except timeout:
             _LOGGER.warning("read_status timeout")
+
+    def set_away(self, is_away):
+        try:
+            device = self.connect()
+            if device.auth():
+                device.set_power(POWER_ON)
+                if is_away:
+                    device.set_mode(MANUAL, self.loop_mode)
+                    device.set_temp(float(self.awayTemp))
+                else:
+                    device.set_mode(AUTO, self.loop_mode)
+                self.away = is_away
+        except timeout:
+            _LOGGER.warning("setAway timeout")
 
     def connect(self):
         """Open a connexion"""
