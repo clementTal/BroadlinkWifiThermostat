@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="BroadlinkWifiThermostat",
-    version='2.4.0',
+    version='2.4.1',
     author="Clément talvard",
     author_email="c.talvard@gmail.com",
     description="Python mmodule to controle broadlink wifi thermostat",
@@ -18,4 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
+    install_requires=["broadlink==0.9.0"]
 )
