@@ -78,7 +78,7 @@ class Thermostat:
                 weekend_conf_in = dict()
                 weekend_conf_out = dict()
 
-                weekday_conf_1_in["start_hour"] = schedules['week_start_1'].strftime('%H')
+                weekday_conf_1_in["start_hour"] = int(schedules['week_start_1'].strftime('%H'))
                 weekday_conf_1_in["start_minute"] = int(schedules['week_start_1'].strftime('%M'))
                 weekday_conf_1_in["temp"] = float(schedules['home_temp'])
 
