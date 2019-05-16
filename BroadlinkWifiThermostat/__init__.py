@@ -42,7 +42,7 @@ class Thermostat:
             device = self.connect()
             if device.auth():
                 now = datetime.now()
-                device.set_time(now.hour, now.minute, now.second, now.weekday())
+                device.set_time(now.hour, now.minute, now.second, now.isoweekday())
         except timeout:
             _LOGGER.error("set_schedule timeout")
 
